@@ -19,11 +19,14 @@ class Start {
     this.data = new WADData(this.path, "E1M1");
     await this.data.initializeWADData();
     const vertexes = this.data.vertexes;
+    const linedefs = this.data.linedefs;
+    // console.log(linedefs);
 
     app.get("/api/data", (req, res) => {
       const data = {
         dimensions: { width: H_WIDTH, height: H_HEIGHT },
         vertexes: { vertexes },
+        linedefs: { linedefs },
       };
       res.json(data);
     });

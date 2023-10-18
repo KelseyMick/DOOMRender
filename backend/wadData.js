@@ -31,6 +31,12 @@ class WADData {
       4,
       0
     );
+    this.linedefs = await this.getLumpData(
+      this.reader.readLinedef,
+      this.mapIndex + this.LUMP_INDICES.LINEDEFS,
+      14,
+      0
+    );
     // console.log("vertexes: ", this.vertexes);
   }
 

@@ -4,6 +4,7 @@ class MapRenderer {
     this.context = canvas.getContext("2d");
     this.dimensions = data.dimensions;
     this.vertexes = data.vertexes.vertexes;
+    this.linedefs = data.linedefs.linedefs;
 
     this.x_min = this.x_max = this.y_min = this.y_max = 0;
     this.calculateMapBounds();
@@ -50,21 +51,47 @@ class MapRenderer {
   }
 
   drawVertexes() {
-    const shiftY = 55; // Adjust this value as needed to control the shift amount
+    const shiftY = 55;
 
     for (let vertex of this.vertexes) {
       let x = this.remap_x(vertex[0]);
-      let y = this.remap_y(vertex[1]) - shiftY; // Shift the dot upward
+      let y = this.remap_y(vertex[1]) - shiftY;
 
-      // Ensure the coordinates are within the canvas boundaries
       x = Math.max(4, Math.min(this.dimensions.width - 4, x));
       y = Math.max(4, Math.min(this.dimensions.height - 4, y));
 
       this.context.beginPath();
-      this.context.arc(x, y, 4, 0, 2 * Math.PI);
+      this.context.arc(x, y, 2.5, 0, 2 * Math.PI);
       this.context.fillStyle = "white";
       this.context.fill();
       this.context.closePath();
+    }
+  }
+
+  drawLinedefs() {
+    const shiftY = 55;
+
+    for (let linedef of this.linedefs) {
+      const startVertexId = linedef[0];
+      const endVertexId = linedef[1];
+
+      if (startVertexId >= 0 && endVertexId >= 0) {
+        const p1 = this.vertexes[startVertexId];
+        const p2 = this.vertexes[endVertexId];
+
+        const x1 = this.remap_x(p1[0]);
+        const y1 = this.remap_y(p1[1]) - shiftY;
+        const x2 = this.remap_x(p2[0]);
+        const y2 = this.remap_y(p2[1]) - shiftY;
+
+        this.context.beginPath();
+        this.context.moveTo(x1, y1);
+        this.context.lineTo(x2, y2);
+        this.context.strokeStyle = "orange";
+        this.context.lineWidth = 2;
+        this.context.stroke();
+        this.context.closePath();
+      }
     }
   }
 }

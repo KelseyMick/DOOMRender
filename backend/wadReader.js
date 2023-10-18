@@ -6,6 +6,7 @@ class WADReader {
     this.fd = fs.openSync(path, "r"); // Synchronous file reading
     this.initialize();
     this.readVertex = this.readVertex.bind(this); // Bind readVertex to the instance
+    this.readLinedef = this.readLinedef.bind(this);
   }
 
   async initialize() {
@@ -23,6 +24,26 @@ class WADReader {
     // console.log(`Read Vertex at offset ${offset}: x=${x}, y=${y}`);
     const vertexes = new Vector2(x, y);
     return [vertexes.x, vertexes.y];
+  }
+
+  async readLinedef(offset) {
+    const startVertexId = await this.read2Bytes(offset);
+    const endVertexId = await this.read2Bytes(offset + 2);
+    const flags = await this.read2Bytes(offset + 4);
+    const lineType = await this.read2Bytes(offset + 6);
+    const sectorTag = await this.read2Bytes(offset + 8);
+    const frontSidedefId = await this.read2Bytes(offset + 10);
+    const backSidedefId = await this.read2Bytes(offset + 12);
+
+    return [
+      startVertexId,
+      endVertexId,
+      flags,
+      lineType,
+      sectorTag,
+      frontSidedefId,
+      backSidedefId
+    ];
   }
 
   async readDirectory() {

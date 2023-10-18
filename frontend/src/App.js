@@ -15,7 +15,7 @@ function App() {
       .get("http://localhost:3001/api/data")
       .then((response) => {
         setData(response.data);
-        setLoading(false); // Data is now available
+        setLoading(false);
       })
       .catch((error) => {
         console.error(error);
@@ -28,6 +28,7 @@ function App() {
       const mapRenderer = new MapRenderer(data, canvas);
       mapRenderer.clearCanvas();
       mapRenderer.drawVertexes();
+      mapRenderer.drawLinedefs();
     }
   }, [data, loading]);
 
