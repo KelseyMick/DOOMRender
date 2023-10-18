@@ -1,3 +1,5 @@
+import Player from "./player";
+
 class MapRenderer {
   constructor(data, canvas) {
     this.canvas = canvas;
@@ -5,6 +7,10 @@ class MapRenderer {
     this.dimensions = data.dimensions;
     this.vertexes = data.vertexes.vertexes;
     this.linedefs = data.linedefs.linedefs;
+    this.nodes = data.nodes.nodes;
+    this.segments = data.segments.segments;
+    this.subSectors = data.subSectors.subSectors;
+    this.things = data.things.things;
 
     this.x_min = this.x_max = this.y_min = this.y_max = 0;
     this.calculateMapBounds();
@@ -93,6 +99,21 @@ class MapRenderer {
         this.context.closePath();
       }
     }
+  }
+
+  drawPlayer() {
+    const shiftY = 55;
+
+    const player = new Player(this);
+    const pos = player.pos;
+    const x = this.remap_x(pos[0]);
+    const y = this.remap_y(pos[1]) - shiftY;
+
+    this.context.beginPath();
+    this.context.arc(x, y, 3, 0, 2 * Math.PI);
+    this.context.fillStyle = "blue";
+    this.context.fill();
+    this.context.closePath();
   }
 }
 

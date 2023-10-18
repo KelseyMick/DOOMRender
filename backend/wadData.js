@@ -37,7 +37,38 @@ class WADData {
       14,
       0
     );
+    this.nodes = await this.getLumpData(
+      this.reader.readNode,
+      this.mapIndex + this.LUMP_INDICES.NODES,
+      28,
+      0
+    );
+    this.subSectors = await this.getLumpData(
+      this.reader.readSubSector,
+      this.mapIndex + this.LUMP_INDICES.SSECTORS,
+      4,
+      0
+    );
+    this.segments = await this.getLumpData(
+      this.reader.readSegment,
+      this.mapIndex + this.LUMP_INDICES.SEGS,
+      12,
+      0
+    );
+    this.things = await this.getLumpData(
+      this.reader.readThing,
+      this.mapIndex + this.LUMP_INDICES.THINGS,
+      10,
+      0
+    );
     // console.log("vertexes: ", this.vertexes);
+  }
+
+  static printAttrs(obj) {
+    console.log();
+    for (let attr of Object.keys(obj)) {
+      console.log(obj[attr], " ");
+    }
   }
 
   async getLumpData(readerFunc, lumpIndex, numBytes, headerLength) {

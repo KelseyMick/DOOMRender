@@ -7,6 +7,10 @@ class WADReader {
     this.initialize();
     this.readVertex = this.readVertex.bind(this); // Bind readVertex to the instance
     this.readLinedef = this.readLinedef.bind(this);
+    this.readThing = this.readThing.bind(this);
+    this.readSegment = this.readSegment.bind(this);
+    this.readSubSector = this.readSubSector.bind(this);
+    this.readNode = this.readNode.bind(this);
   }
 
   async initialize() {
@@ -16,6 +20,72 @@ class WADReader {
     } catch (error) {
       console.error("Error:", error);
     }
+  }
+
+  async readThing(offset) {
+    const x = await this.read2Bytes(offset);
+    const y = await this.read2Bytes(offset + 2);
+
+    const angle = await this.read2Bytes(offset);
+    const type = await this.read2Bytes(offset + 2);
+    const flags = await this.read2Bytes(offset + 4);
+    const pos = new Vector2(x, y);
+    return { angle, type, flags, pos };
+  }
+
+  async readSegment(offset) {
+    const startVertexId = await this.read2Bytes(offset);
+    const endVertexId = await this.read2Bytes(offset + 2);
+    const angle = await this.read2Bytes(offset + 4);
+    const linedefId = await this.read2Bytes(offset + 6);
+    const direction = await this.read2Bytes(offset + 8);
+    const segmentOffset = await this.read2Bytes(offset + 10);
+    return [
+      startVertexId,
+      endVertexId,
+      angle,
+      linedefId,
+      direction,
+      segmentOffset,
+    ];
+  }
+
+  async readSubSector(offset) {
+    const segCount = await this.read2Bytes(offset);
+    const firstSegId = await this.read2Bytes(offset + 2);
+    return [segCount, firstSegId];
+  }
+
+  async readNode(offset) {
+    const xPartition = await this.read2Bytes(offset);
+    const yPartition = await this.read2Bytes(offset + 2);
+    const dxPartition = await this.read2Bytes(offset + 4);
+    const dyPartition = await this.read2Bytes(offset + 6);
+
+    const bboxFrontTop = await this.read2Bytes(offset + 8);
+    const bboxFrontBottom = await this.read2Bytes(offset + 10);
+    const bboxFrontLeft = await this.read2Bytes(offset + 12);
+    const bboxFrontRight = await this.read2Bytes(offset + 14);
+
+    const bboxBackTop = await this.read2Bytes(offset + 16);
+    const bboxBackBottom = await this.read2Bytes(offset + 18);
+    const bboxBackLeft = await this.read2Bytes(offset + 20);
+    const bboxBackRight = await this.read2Bytes(offset + 22);
+
+    return [
+      xPartition,
+      yPartition,
+      dxPartition,
+      dyPartition,
+      bboxFrontTop,
+      bboxFrontBottom,
+      bboxFrontLeft,
+      bboxFrontRight,
+      bboxBackTop,
+      bboxBackBottom,
+      bboxBackLeft,
+      bboxBackRight,
+    ];
   }
 
   async readVertex(offset) {
@@ -42,7 +112,7 @@ class WADReader {
       lineType,
       sectorTag,
       frontSidedefId,
-      backSidedefId
+      backSidedefId,
     ];
   }
 

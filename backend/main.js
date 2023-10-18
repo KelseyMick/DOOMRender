@@ -20,6 +20,10 @@ class Start {
     await this.data.initializeWADData();
     const vertexes = this.data.vertexes;
     const linedefs = this.data.linedefs;
+    const nodes = this.data.nodes;
+    const subSectors = this.data.subSectors;
+    const segments = this.data.segments;
+    const things = this.data.things;
     // console.log(linedefs);
 
     app.get("/api/data", (req, res) => {
@@ -27,6 +31,10 @@ class Start {
         dimensions: { width: H_WIDTH, height: H_HEIGHT },
         vertexes: { vertexes },
         linedefs: { linedefs },
+        nodes: { nodes },
+        subSectors: { subSectors },
+        segments: { segments },
+        things: { things },
       };
       res.json(data);
     });

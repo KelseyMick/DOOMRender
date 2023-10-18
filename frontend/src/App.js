@@ -29,6 +29,8 @@ function App() {
       mapRenderer.clearCanvas();
       mapRenderer.drawVertexes();
       mapRenderer.drawLinedefs();
+      mapRenderer.drawPlayer();
+      // console.log(data);
     }
   }, [data, loading]);
 
