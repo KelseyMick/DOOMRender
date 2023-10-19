@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import MapRenderer from "./mapRenderer";
+import BSP from "./bsp";
 
 function App() {
   const [data, setData] = useState({
@@ -9,6 +10,23 @@ function App() {
   });
   const [loading, setLoading] = useState(true);
   const canvasRef = useRef(null);
+
+  var canvas;
+  var context;
+  var mapRenderer;
+  var bsp;
+
+  const loop = () => {
+    // draw();
+    window.requestAnimationFrame(loop);
+  };
+
+  const draw = () => {
+    mapRenderer.clearCanvas();
+    mapRenderer.drawVertexes();
+    mapRenderer.drawLinedefs();
+    mapRenderer.drawPlayer();
+  };
 
   useEffect(() => {
     axios
@@ -24,12 +42,18 @@ function App() {
 
   useEffect(() => {
     if (!loading) {
-      const canvas = canvasRef.current;
-      const mapRenderer = new MapRenderer(data, canvas);
+      canvas = canvasRef.current;
+      context = canvas.getContext("2d");
+      mapRenderer = new MapRenderer(data, canvas);
       mapRenderer.clearCanvas();
-      mapRenderer.drawVertexes();
+      // mapRenderer.drawVertexes();
       mapRenderer.drawLinedefs();
       mapRenderer.drawPlayer();
+
+      bsp = new BSP(data);
+      mapRenderer.drawNode(bsp.rootNodeId);
+
+      window.requestAnimationFrame(loop);
       // console.log(data);
     }
   }, [data, loading]);

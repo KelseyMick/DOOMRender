@@ -93,12 +93,61 @@ class MapRenderer {
         this.context.beginPath();
         this.context.moveTo(x1, y1);
         this.context.lineTo(x2, y2);
-        this.context.strokeStyle = "orange";
+        this.context.strokeStyle = "rgb(70, 70, 70)";
         this.context.lineWidth = 2;
         this.context.stroke();
         this.context.closePath();
       }
     }
+  }
+
+  drawBbox(bbox, color) {
+    const shiftY = 55;
+
+    const x = this.remap_x(bbox.left);
+    const y = this.remap_y(bbox.top) - shiftY;
+    const width = this.remap_x(bbox.right) - x;
+    const height = this.remap_y(bbox.bottom) - y - shiftY;
+
+    this.context.strokeStyle = color;
+    this.context.lineWidth = 2;
+    this.context.strokeRect(x, y, width, height);
+  }
+
+  drawNode(nodeId) {
+    const shiftY = 55;
+
+    const node = this.nodes[nodeId][0];
+    const bboxFront = {
+      top: node.bboxFrontTop,
+      bottom: node.bboxFrontBottom,
+      left: node.bboxFrontLeft,
+      right: node.bboxFrontRight,
+    };
+    const bboxBack = {
+      top: node.bboxBackTop,
+      bottom: node.bboxBackBottom,
+      left: node.bboxBackLeft,
+      right: node.bboxBackRight,
+    };
+
+    this.drawBbox(bboxFront, "green");
+    this.drawBbox(bboxBack, "red");
+
+    // Drawing the split line, shows the split between front and back bboxes
+    // Example - E1M1: It points down so the front bbox is on the left and the back bbox is on the right
+    const x1 = this.remap_x(node.xPartition);
+    const y1 = this.remap_y(node.yPartition) - shiftY;
+    const x2 = this.remap_x(node.xPartition + node.dxPartition);
+    const y2 = this.remap_y(node.yPartition + node.dyPartition) - shiftY;
+
+    this.context.beginPath();
+    this.context.moveTo(x1, y1);
+    this.context.lineTo(x2, y2);
+    this.context.strokeStyle = "blue";
+    this.context.lineWidth = 4;
+    this.context.stroke();
+    this.context.closePath();
   }
 
   drawPlayer() {
@@ -111,7 +160,7 @@ class MapRenderer {
 
     this.context.beginPath();
     this.context.arc(x, y, 3, 0, 2 * Math.PI);
-    this.context.fillStyle = "blue";
+    this.context.fillStyle = "orange";
     this.context.fill();
     this.context.closePath();
   }

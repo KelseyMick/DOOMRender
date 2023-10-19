@@ -73,7 +73,7 @@ class WADReader {
     const bboxBackRight = await this.read2Bytes(offset + 22);
 
     return [
-      xPartition,
+      {xPartition,
       yPartition,
       dxPartition,
       dyPartition,
@@ -84,7 +84,7 @@ class WADReader {
       bboxBackTop,
       bboxBackBottom,
       bboxBackLeft,
-      bboxBackRight,
+      bboxBackRight,}
     ];
   }
 
