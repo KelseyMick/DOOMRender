@@ -101,6 +101,30 @@ class MapRenderer {
     }
   }
 
+  getColor(seed) {
+    const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const rng = [100, 256];
+    return [rnd(rng[0], rng[1]), rnd(rng[0], rng[1]), rnd(rng[0], rng[1])];
+  }
+
+  drawSeg(seg, subSectorId) {
+    const shiftY = 55;
+    const v1 = this.vertexes[seg.startVertexId];
+    const v2 = this.vertexes[seg.endVertexId];
+
+    const x1 = this.remap_x(v1[0]);
+    const y1 = this.remap_y(v1[1]) - shiftY;
+    const x2 = this.remap_x(v2[0]);
+    const y2 = this.remap_y(v2[1]) - shiftY;
+
+    this.context.strokeStyle = `rgb(${this.getColor(subSectorId)})`;
+    this.context.lineWidth = 2;
+    this.context.beginPath();
+    this.context.moveTo(x1, y1);
+    this.context.lineTo(x2, y2);
+    this.context.stroke();
+  }
+
   drawBbox(bbox, color) {
     const shiftY = 55;
 

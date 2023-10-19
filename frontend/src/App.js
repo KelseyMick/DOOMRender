@@ -23,9 +23,11 @@ function App() {
 
   const draw = () => {
     mapRenderer.clearCanvas();
-    mapRenderer.drawVertexes();
+    // mapRenderer.drawVertexes();
     mapRenderer.drawLinedefs();
     mapRenderer.drawPlayer();
+    mapRenderer.drawNode(bsp.rootNodeId);
+    bsp.update();
   };
 
   useEffect(() => {
@@ -50,8 +52,10 @@ function App() {
       mapRenderer.drawLinedefs();
       mapRenderer.drawPlayer();
 
-      bsp = new BSP(data);
+      bsp = new BSP(data, canvas);
       mapRenderer.drawNode(bsp.rootNodeId);
+
+      bsp.update();
 
       window.requestAnimationFrame(loop);
       // console.log(data);

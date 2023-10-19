@@ -41,19 +41,21 @@ class WADReader {
     const direction = await this.read2Bytes(offset + 8);
     const segmentOffset = await this.read2Bytes(offset + 10);
     return [
-      startVertexId,
-      endVertexId,
-      angle,
-      linedefId,
-      direction,
-      segmentOffset,
+      {
+        startVertexId,
+        endVertexId,
+        angle,
+        linedefId,
+        direction,
+        segmentOffset,
+      },
     ];
   }
 
   async readSubSector(offset) {
     const segCount = await this.read2Bytes(offset);
     const firstSegId = await this.read2Bytes(offset + 2);
-    return [segCount, firstSegId];
+    return [{ segCount, firstSegId }];
   }
 
   async readNode(offset) {
@@ -72,19 +74,26 @@ class WADReader {
     const bboxBackLeft = await this.read2Bytes(offset + 20);
     const bboxBackRight = await this.read2Bytes(offset + 22);
 
+    const frontChildId = await this.read2Bytes(offset + 24, "H");
+    const backChildId = await this.read2Bytes(offset + 26, "H");
+
     return [
-      {xPartition,
-      yPartition,
-      dxPartition,
-      dyPartition,
-      bboxFrontTop,
-      bboxFrontBottom,
-      bboxFrontLeft,
-      bboxFrontRight,
-      bboxBackTop,
-      bboxBackBottom,
-      bboxBackLeft,
-      bboxBackRight,}
+      {
+        xPartition,
+        yPartition,
+        dxPartition,
+        dyPartition,
+        bboxFrontTop,
+        bboxFrontBottom,
+        bboxFrontLeft,
+        bboxFrontRight,
+        bboxBackTop,
+        bboxBackBottom,
+        bboxBackLeft,
+        bboxBackRight,
+        frontChildId,
+        backChildId,
+      },
     ];
   }
 
@@ -163,10 +172,14 @@ class WADReader {
     return buffer.readInt8LE(0);
   }
 
-  async read2Bytes(offset) {
+  async read2Bytes(offset, byteFormat) {
     const buffer = Buffer.alloc(2);
     fs.readSync(this.fd, buffer, 0, 2, offset);
-    return buffer.readInt16LE(0);
+    if (byteFormat === "H") {
+      return buffer.readUInt16LE(0);
+    } else {
+      return buffer.readInt16LE(0);
+    }
   }
 
   async read4Bytes(offset) {
