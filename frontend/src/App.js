@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import MapRenderer from "./mapRenderer";
 import BSP from "./bsp";
+import Player from "./player";
 
 function App() {
   const [data, setData] = useState({
@@ -15,18 +16,42 @@ function App() {
   var context;
   var mapRenderer;
   var bsp;
+  const frameRate = 60;
+  var frameCount = 0;
 
-  const loop = () => {
-    // draw();
-    window.requestAnimationFrame(loop);
+  const keys = {
+    ArrowUp: false,
+    ArrowDown: false,
+    ArrowLeft: false,
+    ArrowRight: false,
+    anykey: false,
+  };
+
+  const keyBoardEvent = (event) => {
+    if (keys[event.code] !== undefined) {
+      keys[event.code] = event.type === "keydown";
+      event.preventDefault();
+      event.type === "keydown" && (keys.anykey = true);
+    }
+  };
+
+  const update = () => {
+    context = canvas.getContext("2d");
+    if (frameCount % (60 / frameRate) === 0) {
+      draw();
+    }
+    frameCount += 1;
+    requestAnimationFrame(update);
   };
 
   const draw = () => {
     mapRenderer.clearCanvas();
+    // Uncomment to show vertices
     // mapRenderer.drawVertexes();
     mapRenderer.drawLinedefs();
     mapRenderer.drawPlayer();
-    mapRenderer.drawNode(bsp.rootNodeId);
+    // Uncomment to show bounding boxes
+    // mapRenderer.drawNode(bsp.rootNodeId);
     bsp.update();
   };
 
@@ -45,30 +70,32 @@ function App() {
   useEffect(() => {
     if (!loading) {
       canvas = canvasRef.current;
+      window.addEventListener("keydown", keyBoardEvent);
+      window.addEventListener("keyup", keyBoardEvent);
+      canvas.addEventListener("click", () => requestAnimationFrame(update), {
+        once: true,
+      });
       context = canvas.getContext("2d");
-      mapRenderer = new MapRenderer(data, canvas);
+      const player = new Player(data, keys);
+      mapRenderer = new MapRenderer(data, canvas, keys, player);
       mapRenderer.clearCanvas();
-      // mapRenderer.drawVertexes();
-      mapRenderer.drawLinedefs();
-      mapRenderer.drawPlayer();
 
-      bsp = new BSP(data, canvas);
-      // mapRenderer.drawNode(bsp.rootNodeId);
-
+      bsp = new BSP(data, canvas, keys);
       bsp.update();
 
-      window.requestAnimationFrame(loop);
-      // console.log(data);
+      window.requestAnimationFrame(update);
     }
   }, [data, loading]);
 
   return (
     <div className="App">
-      <h1>Node.js to React Data Transfer</h1>
+      <h1>Node.js to React Data Transfer For DOOM</h1>
+      <h3>Use the left and right arrow keys to turn</h3>
       <canvas
         ref={canvasRef}
         width={data.dimensions.width}
         height={data.dimensions.height}
+        tabIndex="0"
       ></canvas>
     </div>
   );

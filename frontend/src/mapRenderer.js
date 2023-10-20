@@ -1,8 +1,10 @@
 import Player from "./player";
 
 class MapRenderer {
-  constructor(data, canvas) {
+  constructor(data, canvas, keys, player) {
     this.canvas = canvas;
+    this.keys = keys;
+    this.player = player;
     this.context = canvas.getContext("2d");
     this.dimensions = data.dimensions;
     this.vertexes = data.vertexes.vertexes;
@@ -177,7 +179,6 @@ class MapRenderer {
   drawPlayer() {
     const shiftY = 55;
 
-    this.player = new Player(this);
     const pos = this.player.pos;
     const x = this.remap_x(pos[0]);
     const y = this.remap_y(pos[1]) - shiftY;

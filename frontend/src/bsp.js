@@ -1,16 +1,16 @@
 import MapRenderer from "./mapRenderer";
 
 class BSP {
-  constructor(data, canvas) {
+  constructor(data, canvas, keys) {
     this.SUB_SECTOR_IDENTIFIER = 32768; // 2^15  32768
     this.data = data;
+    this.keys = keys;
     this.player = data.things.things[0];
     this.nodes = data.nodes.nodes;
     this.subSectors = data.subSectors.subSectors;
     this.segs = data.segments.segments;
     this.rootNodeId = this.nodes.length - 1;
     this.canvas = canvas;
-    // console.log(this.data, this.canvas);
   }
 
   update() {
@@ -22,7 +22,7 @@ class BSP {
 
     for (let i = 0; i < subSector.segCount; i++) {
       const seg = this.segs[subSector.firstSegId + i][0];
-      const mapRenderer = new MapRenderer(this.data, this.canvas);
+      const mapRenderer = new MapRenderer(this.data, this.canvas, this.keys);
 
       mapRenderer.drawSeg(seg, subSectorId);
     }
