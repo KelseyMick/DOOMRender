@@ -53,7 +53,7 @@ function App() {
       mapRenderer.drawPlayer();
 
       bsp = new BSP(data, canvas);
-      mapRenderer.drawNode(bsp.rootNodeId);
+      // mapRenderer.drawNode(bsp.rootNodeId);
 
       bsp.update();
 

@@ -93,7 +93,7 @@ class MapRenderer {
         this.context.beginPath();
         this.context.moveTo(x1, y1);
         this.context.lineTo(x2, y2);
-        this.context.strokeStyle = "rgb(70, 70, 70)";
+        this.context.strokeStyle = "red";
         this.context.lineWidth = 2;
         this.context.stroke();
         this.context.closePath();
@@ -117,7 +117,7 @@ class MapRenderer {
     const x2 = this.remap_x(v2[0]);
     const y2 = this.remap_y(v2[1]) - shiftY;
 
-    this.context.strokeStyle = `rgb(${this.getColor(subSectorId)})`;
+    this.context.strokeStyle = "green";
     this.context.lineWidth = 2;
     this.context.beginPath();
     this.context.moveTo(x1, y1);
@@ -177,15 +177,58 @@ class MapRenderer {
   drawPlayer() {
     const shiftY = 55;
 
-    const player = new Player(this);
-    const pos = player.pos;
+    this.player = new Player(this);
+    const pos = this.player.pos;
     const x = this.remap_x(pos[0]);
     const y = this.remap_y(pos[1]) - shiftY;
+
+    this.drawFOV(x, y);
 
     this.context.beginPath();
     this.context.arc(x, y, 3, 0, 2 * Math.PI);
     this.context.fillStyle = "orange";
     this.context.fill();
+    this.context.closePath();
+  }
+
+  degreesToRadians(degrees) {
+    const pi = Math.PI;
+    return degrees * (pi / 180);
+  }
+
+  drawFOV(px, py) {
+    const shiftY = 55;
+
+    const FOV = 90.0;
+    const HFOV = FOV / 2;
+    const x = this.player.pos[0];
+    const y = this.player.pos[1];
+
+    const angle = -this.player.angle + 90;
+    const sina1 = Math.sin(this.degreesToRadians(angle - HFOV));
+    const cosa1 = Math.cos(this.degreesToRadians(angle - HFOV));
+    const sina2 = Math.sin(this.degreesToRadians(angle + HFOV));
+    const cosa2 = Math.cos(this.degreesToRadians(angle + HFOV));
+    const lenRay = this.dimensions.height;
+    const x1 = this.remap_x(x + lenRay * sina1);
+    const y1 = this.remap_y(y + lenRay * cosa1) - shiftY;
+    const x2 = this.remap_x(x + lenRay * sina2);
+    const y2 = this.remap_y(y + lenRay * cosa2) - shiftY;
+
+    this.context.beginPath();
+    this.context.moveTo(px, py);
+    this.context.lineTo(x1, y1);
+    this.context.strokeStyle = "orange";
+    this.context.lineWidth = 4;
+    this.context.stroke();
+    this.context.closePath();
+
+    this.context.beginPath();
+    this.context.moveTo(px, py);
+    this.context.lineTo(x2, y2);
+    this.context.strokeStyle = "orange";
+    this.context.lineWidth = 4;
+    this.context.stroke();
     this.context.closePath();
   }
 }

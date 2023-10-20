@@ -26,9 +26,9 @@ class WADReader {
     const x = await this.read2Bytes(offset);
     const y = await this.read2Bytes(offset + 2);
 
-    const angle = await this.read2Bytes(offset);
-    const type = await this.read2Bytes(offset + 2);
-    const flags = await this.read2Bytes(offset + 4);
+    const angle = await this.read2Bytes(offset + 4);
+    const type = await this.read2Bytes(offset + 6);
+    const flags = await this.read2Bytes(offset + 8);
     const pos = new Vector2(x, y);
     return { angle, type, flags, pos };
   }
