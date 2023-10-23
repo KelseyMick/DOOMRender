@@ -20,14 +20,17 @@ function App() {
   var frameCount = 0;
 
   const keys = {
-    ArrowUp: false,
-    ArrowDown: false,
     ArrowLeft: false,
     ArrowRight: false,
+    KeyW: false,
+    KeyA: false,
+    KeyS: false,
+    KeyD: false,
     anykey: false,
   };
 
   const keyBoardEvent = (event) => {
+    // console.log(event);
     if (keys[event.code] !== undefined) {
       keys[event.code] = event.type === "keydown";
       event.preventDefault();
@@ -76,12 +79,12 @@ function App() {
         once: true,
       });
       context = canvas.getContext("2d");
-      const player = new Player(data, keys);
-      mapRenderer = new MapRenderer(data, canvas, keys, player);
-      mapRenderer.clearCanvas();
 
       bsp = new BSP(data, canvas, keys);
       bsp.update();
+      const player = new Player(data, keys, bsp);
+      mapRenderer = new MapRenderer(data, canvas, keys, player);
+      mapRenderer.clearCanvas();
 
       window.requestAnimationFrame(update);
     }
@@ -89,7 +92,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Node.js to React Data Transfer For DOOM</h1>
+      <h1>Node.js to React Data Transfer</h1>
       <h3>Use the left and right arrow keys to turn</h3>
       <canvas
         ref={canvasRef}
