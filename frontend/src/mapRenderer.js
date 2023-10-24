@@ -210,7 +210,7 @@ class MapRenderer {
     const cosa1 = Math.cos(this.degreesToRadians(angle - HFOV));
     const sina2 = Math.sin(this.degreesToRadians(angle + HFOV));
     const cosa2 = Math.cos(this.degreesToRadians(angle + HFOV));
-    const lenRay = this.dimensions.height;
+    const lenRay = this.dimensions.height + 600;
     const x1 = this.remap_x(x + lenRay * sina1);
     const y1 = this.remap_y(y + lenRay * cosa1) - shiftY;
     const x2 = this.remap_x(x + lenRay * sina2);
@@ -220,7 +220,7 @@ class MapRenderer {
     this.context.moveTo(px, py);
     this.context.lineTo(x1, y1);
     this.context.strokeStyle = "orange";
-    this.context.lineWidth = 4;
+    this.context.lineWidth = 2;
     this.context.stroke();
     this.context.closePath();
 
@@ -228,7 +228,7 @@ class MapRenderer {
     this.context.moveTo(px, py);
     this.context.lineTo(x2, y2);
     this.context.strokeStyle = "orange";
-    this.context.lineWidth = 4;
+    this.context.lineWidth = 2;
     this.context.stroke();
     this.context.closePath();
   }

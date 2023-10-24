@@ -11,7 +11,7 @@ class Player {
   }
 
   control = () => {
-    const speed = 2.3;
+    const speed = 4.3;
     const rotSpeed = 1.8;
 
     if (this.keys.ArrowRight) {

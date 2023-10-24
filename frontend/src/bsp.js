@@ -31,6 +31,42 @@ class BSP {
     return radians * (180 / pi);
   }
 
+  addSegmentToFov(vertex1, vertex2) {
+    vertex1 = new Vector2(vertex1[0], vertex1[1]);
+    vertex2 = new Vector2(vertex2[0], vertex2[1]);
+    let angle1 = this.pointToAngle(vertex1);
+    let angle2 = this.pointToAngle(vertex2);
+
+    const span = this.norm(angle1 - angle2);
+
+    // backface culling
+    if (span >= 180.0) {
+      return false;
+    }
+
+    angle1 -= this.player.angle;
+    angle2 -= this.player.angle;
+
+    const span1 = this.norm(angle1 + this.H_FOV);
+    if (span1 > this.FOV) {
+      if (span1 >= span + this.FOV) {
+        return false;
+      }
+      // handles segment clipping
+      angle1 = this.H_FOV;
+    }
+
+    const span2 = this.norm(this.H_FOV - angle2);
+    if (span2 > this.FOV) {
+      if (span2 >= span + this.FOV) {
+        return false;
+      }
+      // handles segment clipping
+      angle2 = -this.H_FOV;
+    }
+    return true;
+  }
+
   renderSubSector(subSectorId) {
     const subSector = this.subSectors[subSectorId][0];
 
@@ -38,7 +74,9 @@ class BSP {
       const seg = this.segs[subSector.firstSegId + i][0];
       const mapRenderer = new MapRenderer(this.data, this.canvas, this.keys);
 
-      mapRenderer.drawSeg(seg, subSectorId);
+      if (this.addSegmentToFov(seg.startVertex, seg.endVertex)) {
+        mapRenderer.drawSeg(seg, subSectorId);
+      }
     }
   }
 

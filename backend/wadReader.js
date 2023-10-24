@@ -48,6 +48,9 @@ class WADReader {
         linedefId,
         direction,
         segmentOffset,
+        startVertex: "",
+        endVertex: "",
+        linedef: "",
       },
     ];
   }

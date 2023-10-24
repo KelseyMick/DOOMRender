@@ -17,7 +17,7 @@ class WADData {
 
     this.reader = new WADReader(path);
     this.mapName = mapName;
-    this.initializeWADData();
+    // this.initializeWADData();
   }
 
   async initializeWADData() {
@@ -61,13 +61,34 @@ class WADData {
       10,
       0
     );
-    // console.log("vertexes: ", this.vertexes);
+
+    this.updateSegs();
   }
 
   static printAttrs(obj) {
     console.log();
     for (let attr of Object.keys(obj)) {
       console.log(obj[attr], " ");
+    }
+  }
+
+  async updateSegs() {
+    for (let segArr of this.segments) {
+      const seg = segArr[0];
+      const startVertexId = seg.startVertexId;
+      const endVertexId = seg.endVertexId;
+      const linedefId = seg.linedefId;
+
+      seg.startVertex = this.vertexes[startVertexId];
+      seg.endVertex = this.vertexes[endVertexId];
+      seg.linedef = this.linedefs[linedefId];
+
+      // Convert angles from BAMS to degrees
+      seg.angle = (seg.angle << 16) * 8.38190317e-8;
+      if (seg.angle < 0) {
+        seg.angle += 360;
+      }
+      console.log(seg.angle)
     }
   }
 
