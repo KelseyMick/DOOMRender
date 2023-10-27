@@ -3,9 +3,10 @@ import { Vector2 } from "three";
 import { H_WIDTH } from "./settings";
 
 class BSP {
-  constructor(data, canvas, keys, segHandler) {
+  constructor(data, canvas, keys, segHandler, map) {
     this.SUB_SECTOR_IDENTIFIER = 32768; // 2^15  32768
     this.data = data;
+    this.map = map;
     this.keys = keys;
     this.segHandler = segHandler;
     this.player = data.things.things[0];
@@ -27,6 +28,10 @@ class BSP {
       this.isTraverseBsp = true;
       this.renderBSPNode(this.rootNodeId);
     }
+  }
+
+  toggleMap() {
+    this.map.showMap = !this.map.showMap;
   }
 
   updatePlayerPosition(newPos, newAngle) {

@@ -8,6 +8,7 @@ class Player {
     this.angle = this.thing.angle;
     this.DIAG_MOVE_CORR = 1 / Math.sqrt(2);
     this.bsp = bsp;
+    this.lastTabPressTime = 0;
     window.requestAnimationFrame(this.control.bind(this));
   }
 
@@ -40,6 +41,12 @@ class Player {
     if (this.keys.KeyD) {
       moveX += speed * Math.cos(((this.angle - 90) * Math.PI) / 180);
       moveY += speed * Math.sin(((this.angle - 90) * Math.PI) / 180);
+    }
+
+    const currentTime = Date.now();
+    if (this.keys.Tab && currentTime - this.lastTabPressTime >= 200) {
+      this.bsp.toggleMap();
+      this.lastTabPressTime = currentTime; // Update the last press time
     }
 
     // Apply diagonal movement correction

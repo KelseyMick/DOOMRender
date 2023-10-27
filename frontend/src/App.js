@@ -12,6 +12,7 @@ function App() {
     vertexes: { vertexes: [] },
   });
   const [loading, setLoading] = useState(true);
+  const map = { showMap: false };
   const canvasRef = useRef(null);
 
   var canvas;
@@ -29,6 +30,7 @@ function App() {
     KeyA: false,
     KeyS: false,
     KeyD: false,
+    Tab: false,
     anykey: false,
   };
 
@@ -52,15 +54,16 @@ function App() {
 
   const draw = () => {
     mapRenderer.clearCanvas();
-    // Uncomment to show vertices
-    // mapRenderer.drawVertexes();
-    // Uncomment to show linedefs
-    // mapRenderer.drawLinedefs();
-    // Uncomment to show player
-    // mapRenderer.drawPlayer();
+    if (map.showMap) {
+      mapRenderer.drawVertexes();
+      mapRenderer.drawLinedefs();
+      mapRenderer.drawPlayer();
+    }
     // Uncomment to show bounding boxes
     // mapRenderer.drawNode(bsp.rootNodeId);
-    segHandler.update();
+    if (!map.showMap) {
+      segHandler.update();
+    }
     bsp.update();
   };
 
@@ -101,13 +104,13 @@ function App() {
       });
       context = canvas.getContext("2d");
 
-      bsp = new BSP(data, canvas, keys);
+      bsp = new BSP(data, canvas, keys, "", map);
       // bsp.update();
       const player = new Player(data, keys, bsp);
       const viewRenderer = new ViewRenderer(data, canvas);
       segHandler = new SegHandler(data, player, canvas, bsp, viewRenderer);
       mapRenderer = new MapRenderer(data, canvas, keys, player);
-      bsp = new BSP(data, canvas, keys, segHandler);
+      bsp = new BSP(data, canvas, keys, segHandler, map);
       bsp.update();
       mapRenderer.clearCanvas();
 
@@ -118,7 +121,10 @@ function App() {
   return (
     <div className="App">
       <h1>Node.js to React Data Transfer</h1>
-      <h3>Use the left and right arrow keys to turn</h3>
+      <h3>
+        Use the left and right arrow keys to turn. WASD to move. Tab to
+        show/hide map.
+      </h3>
       <canvas
         ref={canvasRef}
         // width={window.innerWidth}

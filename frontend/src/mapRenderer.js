@@ -80,8 +80,8 @@ class MapRenderer {
     const shiftY = 55;
 
     for (let linedef of this.linedefs) {
-      const startVertexId = linedef[0];
-      const endVertexId = linedef[1];
+      const startVertexId = linedef[0].startVertexId;
+      const endVertexId = linedef[0].endVertexId;
 
       if (startVertexId >= 0 && endVertexId >= 0) {
         const p1 = this.vertexes[startVertexId];
