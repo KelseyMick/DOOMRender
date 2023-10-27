@@ -24,6 +24,8 @@ class Start {
     const subSectors = this.data.subSectors;
     const segments = this.data.segments;
     const things = this.data.things;
+    const sectors = this.data.sectors;
+    const sidedefs = this.data.sidedefs;
     // console.log(linedefs);
 
     app.get("/api/data", (req, res) => {
@@ -35,6 +37,8 @@ class Start {
         subSectors: { subSectors },
         segments: { segments },
         things: { things },
+        sectors: { sectors },
+        sidedefs: { sidedefs },
       };
       res.json(data);
     });

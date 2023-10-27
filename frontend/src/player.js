@@ -1,6 +1,7 @@
 class Player {
   constructor(data, keys, bsp) {
     this.player = data;
+    this.height = 41;
     this.keys = keys;
     this.thing = data.things.things[0];
     this.pos = [this.thing.pos.x, this.thing.pos.y];

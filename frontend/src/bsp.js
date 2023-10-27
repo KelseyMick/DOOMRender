@@ -1,23 +1,32 @@
 import MapRenderer from "./mapRenderer";
 import { Vector2 } from "three";
+import { H_WIDTH } from "./settings";
 
 class BSP {
-  constructor(data, canvas, keys) {
+  constructor(data, canvas, keys, segHandler) {
     this.SUB_SECTOR_IDENTIFIER = 32768; // 2^15  32768
     this.data = data;
     this.keys = keys;
+    this.segHandler = segHandler;
     this.player = data.things.things[0];
     this.nodes = data.nodes.nodes;
     this.subSectors = data.subSectors.subSectors;
     this.segs = data.segments.segments;
     this.rootNodeId = this.nodes.length - 1;
     this.canvas = canvas;
+    this.isTraverseBsp = true;
     this.FOV = 90.0;
     this.H_FOV = this.FOV / 2;
+    this.H_WIDTH = this.canvas.width / 2;
+    this.SCREEN_DIST =
+      this.H_WIDTH / Math.tan(this.radiansToDegrees(this.H_FOV));
   }
 
   update() {
-    this.renderBSPNode(this.rootNodeId);
+    if (this.segHandler) {
+      this.isTraverseBsp = true;
+      this.renderBSPNode(this.rootNodeId);
+    }
   }
 
   updatePlayerPosition(newPos, newAngle) {
@@ -29,6 +38,24 @@ class BSP {
   radiansToDegrees(radians) {
     var pi = Math.PI;
     return radians * (180 / pi);
+  }
+
+  degreesToRadians(degrees) {
+    return degrees * (Math.PI / 180);
+  }
+
+  angleToX(angle) {
+    let x;
+    if (angle > 0) {
+      x =
+        this.SCREEN_DIST -
+        Math.tan(this.degreesToRadians(angle)) * this.H_WIDTH;
+    } else {
+      x =
+        -Math.tan(this.degreesToRadians(angle)) * this.H_WIDTH +
+        this.SCREEN_DIST;
+    }
+    return parseInt(x);
   }
 
   addSegmentToFov(vertex1, vertex2) {
@@ -43,6 +70,8 @@ class BSP {
     if (span >= 180.0) {
       return false;
     }
+
+    const rwAngle1 = angle1;
 
     angle1 -= this.player.angle;
     angle2 -= this.player.angle;
@@ -64,18 +93,35 @@ class BSP {
       // handles segment clipping
       angle2 = -this.H_FOV;
     }
-    return true;
+
+    const x1 = this.angleToX(angle1) + 368 * 2;
+    const x2 = this.angleToX(angle2) + 368 * 2;
+    return [x1, x2, rwAngle1];
   }
 
   renderSubSector(subSectorId) {
     const subSector = this.subSectors[subSectorId][0];
+    const mapRenderer = new MapRenderer(
+      this.data,
+      this.canvas,
+      this.keys,
+      this.segHandler
+    );
 
     for (let i = 0; i < subSector.segCount; i++) {
       const seg = this.segs[subSector.firstSegId + i][0];
-      const mapRenderer = new MapRenderer(this.data, this.canvas, this.keys);
 
-      if (this.addSegmentToFov(seg.startVertex, seg.endVertex)) {
-        mapRenderer.drawSeg(seg, subSectorId);
+      // if (this.addSegmentToFov(seg.startVertex, seg.endVertex)) {
+      //   // mapRenderer.drawSeg(seg, subSectorId);
+      //   mapRenderer.drawVlines(result[0], result[1], subSectorId);
+      // }
+      let result = this.addSegmentToFov(seg.startVertex, seg.endVertex);
+      // console.log("hello? ", seg.startVertex, seg.endVertex);
+      if (result) {
+        // mapRenderer.drawSeg(seg, subSectorId);
+        // mapRenderer.drawVlines(result[0], result[1], subSectorId);
+        this.segHandler.classifySegment(seg, ...result);
+        // console.log(this.segHandler);
       }
     }
   }
@@ -158,39 +204,41 @@ class BSP {
   }
 
   renderBSPNode(nodeId) {
-    const absNodeId = nodeId;
+    if (this.isTraverseBsp) {
+      const absNodeId = nodeId;
 
-    if (absNodeId >= this.SUB_SECTOR_IDENTIFIER) {
-      const subSectorId = absNodeId - this.SUB_SECTOR_IDENTIFIER;
-      this.renderSubSector(subSectorId);
-      return;
-    }
-
-    const node = this.nodes[absNodeId][0];
-    const isOnBack = this.isOnBackSide(node);
-
-    const bboxFront = {
-      top: node.bboxFrontTop,
-      bottom: node.bboxFrontBottom,
-      left: node.bboxFrontLeft,
-      right: node.bboxFrontRight,
-    };
-    const bboxBack = {
-      top: node.bboxBackTop,
-      bottom: node.bboxBackBottom,
-      left: node.bboxBackLeft,
-      right: node.bboxBackRight,
-    };
-
-    if (isOnBack) {
-      this.renderBSPNode(node.backChildId);
-      if (this.checkBBox(bboxFront)) {
-        this.renderBSPNode(node.frontChildId);
+      if (absNodeId >= this.SUB_SECTOR_IDENTIFIER) {
+        const subSectorId = absNodeId - this.SUB_SECTOR_IDENTIFIER;
+        this.renderSubSector(subSectorId);
+        return null;
       }
-    } else {
-      this.renderBSPNode(node.frontChildId);
-      if (this.checkBBox(bboxBack)) {
+
+      const node = this.nodes[absNodeId][0];
+      const isOnBack = this.isOnBackSide(node);
+
+      const bboxFront = {
+        top: node.bboxFrontTop,
+        bottom: node.bboxFrontBottom,
+        left: node.bboxFrontLeft,
+        right: node.bboxFrontRight,
+      };
+      const bboxBack = {
+        top: node.bboxBackTop,
+        bottom: node.bboxBackBottom,
+        left: node.bboxBackLeft,
+        right: node.bboxBackRight,
+      };
+
+      if (isOnBack) {
         this.renderBSPNode(node.backChildId);
+        if (this.checkBBox(bboxFront)) {
+          this.renderBSPNode(node.frontChildId);
+        }
+      } else {
+        this.renderBSPNode(node.frontChildId);
+        if (this.checkBBox(bboxBack)) {
+          this.renderBSPNode(node.backChildId);
+        }
       }
     }
   }

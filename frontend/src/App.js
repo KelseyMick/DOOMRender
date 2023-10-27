@@ -3,6 +3,8 @@ import axios from "axios";
 import MapRenderer from "./mapRenderer";
 import BSP from "./bsp";
 import Player from "./player";
+import SegHandler from "./segHandler";
+import ViewRenderer from "./viewRenderer";
 
 function App() {
   const [data, setData] = useState({
@@ -16,6 +18,7 @@ function App() {
   var context;
   var mapRenderer;
   var bsp;
+  var segHandler;
   const frameRate = 60;
   var frameCount = 0;
 
@@ -51,11 +54,26 @@ function App() {
     mapRenderer.clearCanvas();
     // Uncomment to show vertices
     // mapRenderer.drawVertexes();
-    mapRenderer.drawLinedefs();
-    mapRenderer.drawPlayer();
+    // Uncomment to show linedefs
+    // mapRenderer.drawLinedefs();
+    // Uncomment to show player
+    // mapRenderer.drawPlayer();
     // Uncomment to show bounding boxes
     // mapRenderer.drawNode(bsp.rootNodeId);
+    segHandler.update();
     bsp.update();
+  };
+
+  // Function to update canvas dimensions
+  const updateCanvasSize = () => {
+    const newWidth = window.innerWidth;
+    const newHeight = window.innerHeight;
+    setData((prevData) => ({
+      ...prevData, // Copy the existing data
+      dimensions: { width: newWidth, height: newHeight }, // Update only the dimensions field
+    }));
+    canvas.width = newWidth;
+    canvas.height = newHeight;
   };
 
   useEffect(() => {
@@ -73,6 +91,9 @@ function App() {
   useEffect(() => {
     if (!loading) {
       canvas = canvasRef.current;
+
+      // window.addEventListener("resize", updateCanvasSize);
+
       window.addEventListener("keydown", keyBoardEvent);
       window.addEventListener("keyup", keyBoardEvent);
       canvas.addEventListener("click", () => requestAnimationFrame(update), {
@@ -81,9 +102,13 @@ function App() {
       context = canvas.getContext("2d");
 
       bsp = new BSP(data, canvas, keys);
-      bsp.update();
+      // bsp.update();
       const player = new Player(data, keys, bsp);
+      const viewRenderer = new ViewRenderer(data, canvas);
+      segHandler = new SegHandler(data, player, canvas, bsp, viewRenderer);
       mapRenderer = new MapRenderer(data, canvas, keys, player);
+      bsp = new BSP(data, canvas, keys, segHandler);
+      bsp.update();
       mapRenderer.clearCanvas();
 
       window.requestAnimationFrame(update);
@@ -96,8 +121,10 @@ function App() {
       <h3>Use the left and right arrow keys to turn</h3>
       <canvas
         ref={canvasRef}
-        width={data.dimensions.width}
-        height={data.dimensions.height}
+        // width={window.innerWidth}
+        // height={window.innerHeight}
+        width="800"
+        height="600"
         tabIndex="0"
       ></canvas>
     </div>

@@ -11,6 +11,8 @@ class WADReader {
     this.readSegment = this.readSegment.bind(this);
     this.readSubSector = this.readSubSector.bind(this);
     this.readNode = this.readNode.bind(this);
+    this.readSector = this.readSector.bind(this);
+    this.readSidedef = this.readSidedef.bind(this);
   }
 
   async initialize() {
@@ -20,6 +22,50 @@ class WADReader {
     } catch (error) {
       console.error("Error:", error);
     }
+  }
+
+  async readSector(offset) {
+    const floorHeight = await this.read2Bytes(offset);
+    const ceilHeight = await this.read2Bytes(offset + 2);
+    const floorTexture = await this.readString(offset + 4, 8);
+    const ceilTexture = await this.readString(offset + 12, 8);
+
+    const lightLevel = await this.read2Bytes(offset + 20, "H");
+    const type = await this.read2Bytes(offset + 22, "H");
+    const tag = await this.read2Bytes(offset + 24, "H");
+    return {
+      floorHeight,
+      ceilHeight,
+      floorTexture,
+      ceilTexture,
+      lightLevel,
+      type,
+      tag,
+    };
+  }
+
+  async readSidedef(offset) {
+    const xOffset = await this.read2Bytes(offset);
+    const yOffset = await this.read2Bytes(offset + 2);
+    const upperTexture = await this.readString(offset + 4, 8);
+    const lowerTexture = await this.readString(offset + 12, 8);
+    const middleTexture = await this.readString(offset + 20, 8);
+    const sectorId = await this.read2Bytes(offset + 28, "H");
+    return {
+      xOffset,
+      yOffset,
+      upperTexture,
+      lowerTexture,
+      middleTexture,
+      sectorId,
+      floorHeight: "",
+      ceilHeight: "",
+      floorTexture: "",
+      ceilTexture: "",
+      lightLevel: "",
+      type: "",
+      tag: "",
+    };
   }
 
   async readThing(offset) {
@@ -51,6 +97,8 @@ class WADReader {
         startVertex: "",
         endVertex: "",
         linedef: "",
+        frontSector: "",
+        backSector: "",
       },
     ];
   }
@@ -109,22 +157,26 @@ class WADReader {
   }
 
   async readLinedef(offset) {
-    const startVertexId = await this.read2Bytes(offset);
-    const endVertexId = await this.read2Bytes(offset + 2);
-    const flags = await this.read2Bytes(offset + 4);
-    const lineType = await this.read2Bytes(offset + 6);
-    const sectorTag = await this.read2Bytes(offset + 8);
-    const frontSidedefId = await this.read2Bytes(offset + 10);
-    const backSidedefId = await this.read2Bytes(offset + 12);
+    const startVertexId = await this.read2Bytes(offset, "H");
+    const endVertexId = await this.read2Bytes(offset + 2, "H");
+    const flags = await this.read2Bytes(offset + 4, "H");
+    const lineType = await this.read2Bytes(offset + 6, "H");
+    const sectorTag = await this.read2Bytes(offset + 8, "H");
+    const frontSidedefId = await this.read2Bytes(offset + 10, "H");
+    const backSidedefId = await this.read2Bytes(offset + 12, "H");
 
     return [
-      startVertexId,
-      endVertexId,
-      flags,
-      lineType,
-      sectorTag,
-      frontSidedefId,
-      backSidedefId,
+      {
+        startVertexId,
+        endVertexId,
+        flags,
+        lineType,
+        sectorTag,
+        frontSidedefId,
+        backSidedefId,
+        frontSidedef: "",
+        backSidedef: "",
+      },
     ];
   }
 

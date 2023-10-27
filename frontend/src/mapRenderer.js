@@ -6,7 +6,7 @@ class MapRenderer {
     this.keys = keys;
     this.player = player;
     this.context = canvas.getContext("2d");
-    this.dimensions = data.dimensions;
+    this.dimensions = { width: canvas.width, height: canvas.height };
     this.vertexes = data.vertexes.vertexes;
     this.linedefs = data.linedefs.linedefs;
     this.nodes = data.nodes.nodes;
@@ -103,10 +103,36 @@ class MapRenderer {
     }
   }
 
+  // Initialize the pseudo-random number generator with the seed
   getColor(seed) {
-    const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const rng = [100, 256];
-    return [rnd(rng[0], rng[1]), rnd(rng[0], rng[1]), rnd(rng[0], rng[1])];
+    // Use seedrandom to ensure consistent random numbers with the given seed
+    const rng = new Math.seedrandom(seed.toString());
+    const rnd = (min, max) => Math.floor(rng() * (max - min + 1)) + min;
+
+    // Generate RGB color values
+    const color = [rnd(100, 255), rnd(100, 255), rnd(100, 255)];
+
+    return color;
+  }
+
+  drawVlines(x1, x2, subSectorId) {
+    const shiftAmount = 368;
+    const color = this.getColor(subSectorId);
+    this.context.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+    this.context.lineWidth = 2;
+
+    // x1 += shiftAmount;
+    // x2 += shiftAmount;
+
+    this.context.beginPath();
+    this.context.moveTo(x1, 0);
+    this.context.lineTo(x1, this.canvas.height);
+    this.context.stroke();
+
+    this.context.beginPath();
+    this.context.moveTo(x2, 0);
+    this.context.lineTo(x2, this.canvas.height);
+    this.context.stroke();
   }
 
   drawSeg(seg, subSectorId) {
@@ -117,7 +143,7 @@ class MapRenderer {
     const x1 = this.remap_x(v1[0]);
     const y1 = this.remap_y(v1[1]) - shiftY;
     const x2 = this.remap_x(v2[0]);
-    const y2 = this.remap_y(v2[1]) - shiftY;
+    const y2 = this.remap_y(v2[1]);
 
     this.context.strokeStyle = "green";
     this.context.lineWidth = 2;

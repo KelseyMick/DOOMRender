@@ -15,6 +15,18 @@ class WADData {
       BLOCKMAP: 10,
     };
 
+    this.LINEDEF_FLAGS = {
+      BLOCKING: 1,
+      BLOCK_MONSTERS: 2,
+      TWO_SIDED: 4,
+      DONT_PEG_TOP: 8,
+      DONT_PEG_BOTTOM: 16,
+      SECRET: 32,
+      SOUND_BLOCK: 64,
+      DONT_DRAW: 128,
+      MAPPED: 256,
+    };
+
     this.reader = new WADReader(path);
     this.mapName = mapName;
     // this.initializeWADData();
@@ -61,7 +73,21 @@ class WADData {
       10,
       0
     );
+    this.sidedefs = await this.getLumpData(
+      this.reader.readSidedef,
+      this.mapIndex + this.LUMP_INDICES.SIDEDEFS,
+      30,
+      0
+    );
+    this.sectors = await this.getLumpData(
+      this.reader.readSector,
+      this.mapIndex + this.LUMP_INDICES.SECTORS,
+      26,
+      0
+    );
 
+    this.updateLinedefs();
+    this.updateSidedefs();
     this.updateSegs();
   }
 
@@ -69,6 +95,27 @@ class WADData {
     console.log();
     for (let attr of Object.keys(obj)) {
       console.log(obj[attr], " ");
+    }
+  }
+
+  async updateSidedefs() {
+    for (let sidedef of this.sidedefs) {
+      const sectorId = sidedef.sectorId;
+      sidedef.sector = this.sectors[sectorId];
+    }
+  }
+
+  async updateLinedefs() {
+    for (let linedef of this.linedefs) {
+      const frontSidedefId = linedef[0].frontSidedefId;
+      linedef[0].frontSidedef = this.sidedefs[frontSidedefId];
+
+      if (linedef[0].backSidedefId === 0xffff) {
+        // undefined sidedef
+        linedef[0].backSidedef = null;
+      } else {
+        linedef[0].backSidedef = this.sidedefs[linedef[0].backSidedefId];
+      }
     }
   }
 
@@ -83,12 +130,34 @@ class WADData {
       seg.endVertex = this.vertexes[endVertexId];
       seg.linedef = this.linedefs[linedefId];
 
+      let frontSidedef;
+      let backSidedef;
+
+      if (seg.direction) {
+        frontSidedef = seg.linedef[0].backSidedef;
+        backSidedef = seg.linedef[0].frontSidedef;
+      } else {
+        frontSidedef = seg.linedef[0].frontSidedef;
+        backSidedef = seg.linedef[0].backSidedef;
+      }
+
+      seg.frontSector = frontSidedef.sector;
+
+      if (this.LINEDEF_FLAGS["TWO_SIDED"] && seg.linedef[0].flags) {
+        if (backSidedef) {
+          seg.backSector = backSidedef.sector;
+        } else {
+          seg.backSector = null;
+        }
+      } else {
+        seg.backSector = null;
+      }
+
       // Convert angles from BAMS to degrees
       seg.angle = (seg.angle << 16) * 8.38190317e-8;
       if (seg.angle < 0) {
         seg.angle += 360;
       }
-      console.log(seg.angle)
     }
   }
 
