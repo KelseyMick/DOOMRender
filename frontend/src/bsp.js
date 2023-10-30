@@ -35,22 +35,26 @@ class BSP {
   }
 
   getSubSectorHeight() {
-    const subSectorId = this.rootNodeId;
+    let subSectorId = this.rootNodeId;
 
-    while (!subSectorId >= this.SUB_SECTOR_IDENTIFIER) {
+    while (!(subSectorId >= this.SUB_SECTOR_IDENTIFIER)) {
       const node = this.nodes[subSectorId];
-      console.log(subSectorId);
+      let isOnBack;
 
-      const isOnBack = this.isOnBackSide(node);
+      if (node) {
+        isOnBack = this.isOnBackSide(node[0]);
+      }
+
       if (isOnBack) {
-        subSectorId = this.nodes[subSectorId].backChildId;
+        subSectorId = this.nodes[subSectorId][0].backChildId;
       } else {
-        subSectorId = this.nodes[subSectorId].frontChildId;
+        subSectorId = this.nodes[subSectorId][0].frontChildId;
       }
     }
 
-    const subSector = this.subSectors[subSectorId - this.SUB_SECTOR_IDENTIFIER];
-    const seg = this.segs[subSector.firstSegId];
+    const subSector =
+      this.subSectors[subSectorId - this.SUB_SECTOR_IDENTIFIER][0];
+    const seg = this.segs[subSector.firstSegId][0];
     return seg.frontSector.floorHeight;
   }
 

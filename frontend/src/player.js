@@ -65,7 +65,7 @@ class Player {
     this.angle = this.angle % 360;
 
     this.bsp.updatePlayerPosition(this.pos, this.angle);
-    // this.getHeight();
+    this.getHeight();
 
     window.requestAnimationFrame(this.control);
   };
