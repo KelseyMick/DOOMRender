@@ -365,34 +365,6 @@ class SegHandler {
     }
   }
 
-  // clipPortalWalls(xStart, xEnd) {
-  //   let currWall = new Set(
-  //     Array.from({ length: xEnd - xStart }, (_, i) => i + xStart)
-  //   );
-
-  //   let intersection = new Set(
-  //     [...currWall].filter((x) => this.screenRange.has(x))
-  //   );
-
-  //   if (intersection.size > 0) {
-  //     if (intersection.size === currWall.size) {
-  //       this.drawPortalWallRange(xStart, xEnd - 1);
-  //     } else {
-  //       let arr = Array.from(intersection).sort((a, b) => a - b);
-  //       let x = arr[0];
-  //       for (let i = 1; i < arr.length; i++) {
-  //         let x1 = arr[i - 1];
-  //         let x2 = arr[i];
-  //         if (x2 - x1 > 1) {
-  //           this.drawPortalWallRange(x, x1);
-  //           x = x2;
-  //         }
-  //       }
-  //       this.drawPortalWallRange(x, arr[arr.length - 1]);
-  //     }
-  //   }
-  // }
-
   clipSolidWalls(xStart, xEnd) {
     if (this.screenRange) {
       let currWall = new Set(
@@ -436,17 +408,20 @@ class SegHandler {
     this.seg = segment;
     this.rwAngle1 = rwAngle1;
 
+    // Does not cross a pixel?
     if (x1 === x2) {
       return null;
     }
     const backSector = segment.backSector;
     const frontSector = segment.frontSector;
 
+    // Handle solid walls
     if (backSector === null) {
       this.clipSolidWalls(x1, x2);
       return null;
     }
 
+    // Wall with window
     if (
       frontSector.ceilHeight !== backSector.ceilHeight ||
       frontSector.floorHeight !== backSector.floorHeight
@@ -455,6 +430,9 @@ class SegHandler {
       return null;
     }
 
+    // Reject empty lines used for triggers and special events.
+    // Identical floor and ceiling on both sides, identical
+    // light levels on both sides, and no middle texture
     if (
       backSector.ceilTexture === frontSector.ceilTexture &&
       backSector.floorTexture === frontSector.floorTexture &&
@@ -464,51 +442,9 @@ class SegHandler {
       return null;
     }
 
+    // Borders with different light levels and textures
     this.clipPortalWalls(x1, x2);
   }
-
-  // classifySegment(segment, x1, x2, rwAngle1) {
-  //   this.seg = segment;
-  //   this.rwAngle1 = rwAngle1;
-
-  //   // Does not cross a pixel?
-  //   if (x1 === x2) {
-  //     return null;
-  //   }
-
-  //   const backSector = segment.backSector;
-  //   const frontSector = segment.frontSector;
-
-  //   // Handle solid walls
-  //   if (!backSector) {
-  //     this.clipSolidWalls(x1, x2);
-  //     return null;
-  //   }
-
-  //   // Wall with window
-  //   if (
-  //     frontSector.ceilHeight !== backSector.ceilHeight ||
-  //     frontSector.floorHeight !== backSector.floorHeight
-  //   ) {
-  //     this.clipPortalWalls(x1, x2);
-  //     return null;
-  //   }
-
-  //   // Reject empty lines used for triggers and special events.
-  //   // Identical floor and ceiling on both sides, identical
-  //   // light levels on both sides, and no middle texture
-  //   if (
-  //     backSector.ceilTexture === frontSector.ceilTexture &&
-  //     backSector.floorTexture === frontSector.floorTexture &&
-  //     backSector.lightLevel === frontSector.lightLevel &&
-  //     this.seg.linedef[0].frontSidedef.middleTexture === "-"
-  //   ) {
-  //     return null;
-  //   }
-
-  //   // Borders with different light levels and textures
-  //   this.clipPortalWalls(x1, x2);
-  // }
 }
 
 export default SegHandler;
