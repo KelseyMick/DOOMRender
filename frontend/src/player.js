@@ -12,6 +12,10 @@ class Player {
     window.requestAnimationFrame(this.control.bind(this));
   }
 
+  getHeight() {
+    this.height = this.bsp.getSubSectorHeight() + 41;
+  }
+
   control = () => {
     const speed = 4.3;
     const rotSpeed = 1.8;
@@ -61,6 +65,7 @@ class Player {
     this.angle = this.angle % 360;
 
     this.bsp.updatePlayerPosition(this.pos, this.angle);
+    // this.getHeight();
 
     window.requestAnimationFrame(this.control);
   };

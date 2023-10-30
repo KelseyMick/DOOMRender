@@ -34,6 +34,26 @@ class BSP {
     this.map.showMap = !this.map.showMap;
   }
 
+  getSubSectorHeight() {
+    const subSectorId = this.rootNodeId;
+
+    while (!subSectorId >= this.SUB_SECTOR_IDENTIFIER) {
+      const node = this.nodes[subSectorId];
+      console.log(subSectorId);
+
+      const isOnBack = this.isOnBackSide(node);
+      if (isOnBack) {
+        subSectorId = this.nodes[subSectorId].backChildId;
+      } else {
+        subSectorId = this.nodes[subSectorId].frontChildId;
+      }
+    }
+
+    const subSector = this.subSectors[subSectorId - this.SUB_SECTOR_IDENTIFIER];
+    const seg = this.segs[subSector.firstSegId];
+    return seg.frontSector.floorHeight;
+  }
+
   updatePlayerPosition(newPos, newAngle) {
     this.player.pos = new Vector2(newPos[0], newPos[1]);
     this.player.angle = newAngle;
@@ -99,8 +119,8 @@ class BSP {
       angle2 = -this.H_FOV;
     }
 
-    const x1 = this.angleToX(angle1) + 368 * 2;
-    const x2 = this.angleToX(angle2) + 368 * 2;
+    const x1 = this.angleToX(angle1) + 690;
+    const x2 = this.angleToX(angle2) + 690;
     return [x1, x2, rwAngle1];
   }
 
